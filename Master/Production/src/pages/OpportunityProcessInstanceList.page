@@ -1,0 +1,46 @@
+<apex:page standardController="Opportunity" docType="html-5.0" title="申込書承認履歴" showHeader="false" sidebar="false"
+	extensions="OpportunityApprovalLogic" action="{!selectApprovalHistoryList}">
+	<apex:pageBlock mode="detail">
+		<apex:dataTable value="{!dtoList}" var="dto" id="theTable" styleClass="list" rowClasses="dataRow" headerClass="headerRow">
+			<apex:outputText value="{!dto}" id="theValue"/>
+			<apex:column width="10%">
+				<apex:facet name="header">状況</apex:facet>
+				<apex:outputText value="{!dto.approvalStatus}" rendered="{!dto.canApprove = false}"/>
+				<apex:outputLink value="{!$Site.BaseUrl}/apex/OpportunityApproval?id={!op.Id}" rendered="{!dto.canApprove}" target="_blank" style="color:blue">
+					{!dto.approvalStatus}
+				</apex:outputLink>
+			</apex:column>
+			<apex:column width="25%">
+				<apex:facet name="header">
+					<apex:outputText value="進捗" />
+				</apex:facet>
+				<apex:outputText value="{!dto.stepName}"/>
+			</apex:column>
+			<apex:column width="10%" >
+				<apex:facet name="header">承認者</apex:facet>
+				<apex:outputText value="{!dto.actorName}"/>
+			</apex:column>
+			<apex:column width="15%">
+				<apex:facet name="header">日付</apex:facet>
+				<apex:outputText value="{!dto.approvalDate}"/>
+			</apex:column>
+			<apex:column width="35%">
+				<apex:facet name="header">コメント</apex:facet>
+				<apex:outputText value="{!$Site.BaseUrl}{!dto.comments}"/>
+			</apex:column>
+		</apex:dataTable>
+		<apex:pageBlockButtons location="top" rendered="{!isButtonVisible}">
+			<input type="button" value="申込書を申請する" onclick="isOpen('{!$Site.BaseUrl}/apex/OpportunityRequestApproval?id={!op.Id}');"/>
+			<input type="button" value="承認進捗を見る" onclick="isOpen('{!$Site.BaseUrl}/apex/OpportunityApproval?id={!op.Id}');"/>
+		</apex:pageBlockButtons>
+	</apex:pageBlock>
+	<script type="text/javascript">
+		function isOpen(url) {
+			if ({!exsitLineItem}) {
+				window.open().location.href=url;
+			} else {
+				alert('採用プランが登録されていません。');
+			}
+		}
+	</script>
+</apex:page>

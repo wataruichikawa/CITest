@@ -1,0 +1,145 @@
+<apex:page standardController="Contract_Application_Information__c" docType="html-5.0" title="契約内容承認画面" showHeader="true" sidebar="false"
+  extensions="ContractApplicationApprovalLogic" action="{!showProcessWorkItem}">
+  <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"/>
+  <style type="text/css">
+    .rep-tabList {
+      list-style: none;
+        position: relative;
+        z-index: 10;
+        padding: 0 10px;
+    }
+    .rep-tabList li {
+      float: left;
+      margin-right: 2px;
+        margin-left: 0px !important;
+    }
+    .rep-tabList a {
+        display: block;
+        width: 135px;
+        min-height: 30px;
+        text-align: center;
+        border-width: 1px 1px 0 1px;
+        border-style: solid;
+        padding: 8px 0px;
+        border-radius: 4px 4px 0 0;
+        margin-top: 3px;
+        text-decoration: none !important;
+        font-weight: bold;
+        border-color: #CFCFCF;
+        color: #333333 !important;
+    }
+    .rep-tabList a:hover {
+        border-color: #35B4E9;
+        background-color: #BADCE7;
+        color: #35B4E9 !important;
+    }
+    .rep-tabList .current a {
+        border-color: #35B4E9;
+        background-color: #D5EBF2;
+        color: #35B4E9 !important;
+    }
+    .pdf-tabList {
+      list-style: none;
+        position: relative;
+        z-index: 10;
+        padding: 0 10px;
+    }
+    .pdf-tabList li {
+      float: left;
+      margin-right: 2px;
+        margin-left: 0px !important;
+    }
+  </style>
+  <article style="width:1800px;margin-left: auto;margin-right: auto;">
+    <section style="padding-top: 15px;width: 900px;float: left;">
+    	<h1>{!IF(cai.Del_Flg__c, 'キャンセル承認', '発生売上承認')}</h1>
+      <apex:include pageName="ApplicationInputFormView" />
+      <apex:include pageName="billingView" />
+      <apex:include pageName="productView" />
+      <apex:form id="form">
+      <apex:inputHidden value="{!detailDto.workItemId}"/>
+      <apex:pageBlock id="block" title="{!detailDto.titleString}" mode="detail">
+        <apex:pageMessages />
+        <apex:pageBlockSection title="承認履歴" columns="1" >
+          <apex:include pageName="contractApplicationProcessInstanceList"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockSection id="section" title="承認者のコメント" columns="1" rendered="{!detailDto.canApprove = true}">
+          <apex:inputTextarea id="comments" rows="3" style="width:700px" value="{!detailDto.comments}"/>
+        </apex:pageBlockSection>
+        <apex:pageBlockButtons location="bottom" rendered="{!detailDto.canApprove = true}">
+          <apex:commandButton styleclass="reject-btn" action="{!doReject}" value="却下" />
+          <apex:commandButton styleclass="approve-btn" action="{!doApprove}" value="承認"/>
+          <div id="btn_overlay" style="display:none;position:relative;top:-24px;width:74px;height:24px;background-color:#fff;opacity:0.5;"></div>
+        </apex:pageBlockButtons>
+      </apex:pageBlock>
+      </apex:form>
+    </section>
+    <section style="padding-left:10px;width:890px;float:right;">
+      <ul id="jsi_tabList" class="rep-tabList">
+        <apex:repeat value="{!attachmentList}" var="at">
+        <li>
+          <a id="a_{!at.id}" href="javascript:void(0);">{!at.Name}</a>
+        </li>
+        </apex:repeat>
+      </ul>
+      <ul id="jsi_pdfList" class="pdf-tabList">
+        <apex:repeat value="{!attachmentList}" var="attachment">
+        <li>
+          <iframe class="jsc_iframe" id="file_{!attachment.Id}" name="{!attachment.Name}" src="{!$Site.BaseUrl}/servlet/servlet.FileDownload?file={!attachment.Id}" style="width:750px; height:900px;" frameborder="0"></iframe>
+        </li>
+        </apex:repeat>
+      </ul>
+    </section>
+  </article>
+  <script type="text/javascript">
+    $j = jQuery.noConflict();
+    $j('#jsi_tabList li').on('click', function(){
+      // クリックされたインデックス
+      var index = $j('#jsi_tabList li').index(this);
+      // コンテンツを一度すべて非表示
+      $j('#jsi_pdfList li').css('display', 'none');
+      // クリックされたタブと同じ順番のコンテンツを表示
+      $j('#jsi_pdfList li').eq(index).css('display', 'block');
+      // タブのセレクト(current)を付け直し
+      $j('#jsi_tabList li').removeClass('current');
+      $j(this).addClass('current');
+    });
+    $j(document).ready(function($) {
+      // コンテンツを一度すべて非表示し、一つ目の要素だけ表示
+      $j('#jsi_pdfList li').css('display', 'none');
+      $j('#jsi_pdfList li').eq(0).css('display', 'block');
+
+      // タブのセレクト(current)を付け直し
+      $j('#jsi_tabList li').removeClass('current');
+      $j('#jsi_tabList li').eq(0).addClass('current');
+
+      // 承認ボタンのクリックイベント
+      $j('.approve-btn').on('click', function() {
+        $j('#btn_overlay').show();
+              setTimeout(function() {
+                $j('#btn_overlay').hide();
+              }, 30000);
+              return true;
+      });
+      // 却下ボタンのクリックイベント
+      $j('.reject-btn').on('click', function() {
+        var b = checkComments();
+        if (b) {
+          $j('#btn_overlay').show();
+                setTimeout(function() {
+                  $j('#btn_overlay').hide();
+                }, 10000);
+        }
+        return b;
+      });
+    });
+    function checkComments(){
+      var comments = document.getElementById('{!$Component.form.block.section.comments}').value;
+      if (comments==''){
+        alert('却下する場合はコメントを入力してください');
+        return false;
+      }
+      return true;
+    }
+  </script>
+</apex:page>

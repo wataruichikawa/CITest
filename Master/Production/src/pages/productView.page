@@ -1,0 +1,376 @@
+<apex:page id="productView" controller="ProductController">
+	<apex:pageBlock title="申込商品" mode="detail" >
+		<apex:repeat value="{!productDtoList}" var="product">
+			<apex:outputPanel rendered="{!product.ProductTypeName == '基本商品'}">
+				<apex:pageBlockSection columns="2" title="{!product.serviceName} {!product.productTypeName}">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラン名</apex:outputLabel>
+						<apex:outputLink value="/{!product.contractApplicationProductId}" target="_blank" >{!product.contractApplicationProductName}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >初期価格</apex:outputLabel>
+						<apex:outputText value="{!product.initialPriceStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 1, true, false)}">
+						<apex:outputLabel >月額(1ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice1Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 1, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 2, true, false)}">
+						<apex:outputLabel >月額(2ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice2Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 3, true, false)}">
+						<apex:outputLabel >月額(3ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice3Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 3, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 4, true, false)}">
+						<apex:outputLabel >月額(4ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice4Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 5, true, false)}">
+						<apex:outputLabel >月額(5ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice5Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 5, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 6, true, false)}">
+						<apex:outputLabel >月額(6ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice6Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 7, true, false)}">
+						<apex:outputLabel >月額(7ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice7Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 7, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 8, true, false)}">
+						<apex:outputLabel >月額(8ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice8Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 9, true, false)}">
+						<apex:outputLabel >月額(9ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice9Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 9, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 10, true, false)}">
+						<apex:outputLabel >月額(10ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice10Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 11, true, false)}">
+						<apex:outputLabel >月額(11ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice11Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 11, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 12, true, false)}">
+						<apex:outputLabel >月額(12ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice12Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラスカ種別</apex:outputLabel>
+						<apex:outputText value="{!product.platinumScoutTypeName}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラスカ付与通数</apex:outputLabel>
+						<apex:outputText value="{!product.platinumScoutCountStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラスカ付与通数(初月)</apex:outputLabel>
+						<apex:outputText value="{!product.platinumScoutInitialCountStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:repeat value="{!product.replaceFeeList}" var="fee">
+						<apex:pageBlockSectionItem rendered="{!OR(CONTAINS(product.hirePlanCategory, '固定'), CONTAINS(product.hirePlanCategory, '特別'))}">
+							<apex:outputLabel >{!fee.labelName}成功報酬(固定)</apex:outputLabel>
+							<apex:outputText value="{!fee.replaceFeeStr}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!CONTAINS(product.hirePlanCategory, '固定')}">
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別'))}">
+							<apex:outputLabel >{!fee.labelName}成功報酬(パーセント)</apex:outputLabel>
+							<apex:outputText value="{!fee.replaceFeeRateStr}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!CONTAINS(product.hirePlanCategory, '成功報酬')}">
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+							<apex:outputLabel >{!fee.labelName}成功報酬<br />(ボリュームディスカウント1人目)</apex:outputLabel>
+							<apex:outputText value="{!fee.volumeDiscount1Str}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+							<apex:outputLabel >{!fee.labelName}成功報酬<br />(ボリュームディスカウント2人目)</apex:outputLabel>
+							<apex:outputText value="{!fee.volumeDiscount2Str}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+							<apex:outputLabel >{!fee.labelName}成功報酬<br />(ボリュームディスカウント3人目以降)</apex:outputLabel>
+							<apex:outputText value="{!fee.volumeDiscount3Str}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem >
+							<apex:outputLabel >{!fee.labelName}ミニマムギャランティ</apex:outputLabel>
+							<apex:outputText value="{!fee.minimumFeeStr}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem >
+						</apex:pageBlockSectionItem>
+					</apex:repeat>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+			<apex:outputPanel rendered="{!product.ProductTypeName == 'RS'}">
+				<apex:pageBlockSection columns="2" title="{!product.serviceName}">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラン名</apex:outputLabel>
+						<apex:outputLink value="/{!product.contractApplicationProductId}" target="_blank" >{!product.contractApplicationProductName}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >初期価格</apex:outputLabel>
+						<apex:outputText value="{!product.initialPriceStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 1, true, false)}">
+						<apex:outputLabel >月額(1ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice1Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 1, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 2, true, false)}">
+						<apex:outputLabel >月額(2ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice2Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 3, true, false)}">
+						<apex:outputLabel >月額(3ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice3Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 3, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 4, true, false)}">
+						<apex:outputLabel >月額(4ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice4Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 5, true, false)}">
+						<apex:outputLabel >月額(5ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice5Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 5, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 6, true, false)}">
+						<apex:outputLabel >月額(6ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice6Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 7, true, false)}">
+						<apex:outputLabel >月額(7ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice7Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 7, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 8, true, false)}">
+						<apex:outputLabel >月額(8ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice8Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 9, true, false)}">
+						<apex:outputLabel >月額(9ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice9Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 9, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 10, true, false)}">
+						<apex:outputLabel >月額(10ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice10Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 11, true, false)}">
+						<apex:outputLabel >月額(11ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice11Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse == 11, true, false)}">
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 12, true, false)}">
+						<apex:outputLabel >月額(12ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice12Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:repeat value="{!product.replaceFeeList}" var="fee">
+						<apex:pageBlockSectionItem rendered="{!OR(CONTAINS(product.hirePlanCategory, '固定'), CONTAINS(product.hirePlanCategory, '特別'))}">
+							<apex:outputLabel >{!fee.labelName}成功報酬(固定)</apex:outputLabel>
+							<apex:outputText value="{!fee.replaceFeeStr}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!CONTAINS(product.hirePlanCategory, '固定')}">
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別'))}">
+							<apex:outputLabel >{!fee.labelName}成功報酬(パーセント)</apex:outputLabel>
+							<apex:outputText value="{!fee.replaceFeeRateStr}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!CONTAINS(product.hirePlanCategory, '成功報酬')}">
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+							<apex:outputLabel >{!fee.labelName}成功報酬<br />(ボリュームディスカウント1人目)</apex:outputLabel>
+							<apex:outputText value="{!fee.volumeDiscount1Str}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+							<apex:outputLabel >{!fee.labelName}成功報酬<br />(ボリュームディスカウント2人目)</apex:outputLabel>
+							<apex:outputText value="{!fee.volumeDiscount2Str}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(OR(CONTAINS(product.hirePlanCategory, '成功報酬'), CONTAINS(product.hirePlanCategory, '特別')), fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+							<apex:outputLabel >{!fee.labelName}成功報酬<br />(ボリュームディスカウント3人目以降)</apex:outputLabel>
+							<apex:outputText value="{!fee.volumeDiscount3Str}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem rendered="{!AND(fee.labelName = 'ハイクラス', product.serviceType = 'ESS')}">
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem >
+							<apex:outputLabel >{!fee.labelName}ミニマムギャランティ</apex:outputLabel>
+							<apex:outputText value="{!fee.minimumFeeStr}" />
+						</apex:pageBlockSectionItem>
+						<apex:pageBlockSectionItem >
+						</apex:pageBlockSectionItem>
+					</apex:repeat>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+			<apex:outputPanel rendered="{!product.ProductTypeName == 'オプション'}">
+				<apex:pageBlockSection columns="2" title="{!product.serviceName} {!product.productTypeName}">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラン名</apex:outputLabel>
+						<apex:outputLink value="/{!product.contractApplicationProductId}" target="_blank" >{!product.contractApplicationProductName}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >初期価格</apex:outputLabel>
+						<apex:outputText value="{!product.initialPriceStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 1, true, false)}">
+						<apex:outputLabel >月額(1ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice1Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 2, true, false)}">
+						<apex:outputLabel >月額(2ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice2Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 3, true, false)}">
+						<apex:outputLabel >月額(3ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice3Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 4, true, false)}">
+						<apex:outputLabel >月額(4ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice4Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 5, true, false)}">
+						<apex:outputLabel >月額(5ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice5Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 6, true, false)}">
+						<apex:outputLabel >月額(6ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice6Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 7, true, false)}">
+						<apex:outputLabel >月額(7ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice7Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 8, true, false)}">
+						<apex:outputLabel >月額(8ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice8Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 9, true, false)}">
+						<apex:outputLabel >月額(9ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice9Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 10, true, false)}">
+						<apex:outputLabel >月額(10ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice10Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 11, true, false)}">
+						<apex:outputLabel >月額(11ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice11Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 12, true, false)}">
+						<apex:outputLabel >月額(12ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice12Str}" />
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+			<apex:outputPanel rendered="{!product.ProductTypeName == 'プラスカ'}">
+				<apex:pageBlockSection columns="2" title="{!product.serviceName} {!product.productTypeName}">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラン名</apex:outputLabel>
+						<apex:outputLink value="/{!product.contractApplicationProductId}" target="_blank" >{!product.contractApplicationProductName}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >初期価格</apex:outputLabel>
+						<apex:outputText value="{!product.initialPriceStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラスカ種別</apex:outputLabel>
+						<apex:outputText value="{!product.platinumScoutTypeName}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >プラスカ付与通数</apex:outputLabel>
+						<apex:outputText value="{!product.platinumScoutCountStr}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 1, true, false)}">
+						<apex:outputLabel >月額(1ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice1Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 2, true, false)}">
+						<apex:outputLabel >月額(2ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice2Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 3, true, false)}">
+						<apex:outputLabel >月額(3ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice3Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 4, true, false)}">
+						<apex:outputLabel >月額(4ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice4Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 5, true, false)}">
+						<apex:outputLabel >月額(5ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice5Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 6, true, false)}">
+						<apex:outputLabel >月額(6ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice6Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 7, true, false)}">
+						<apex:outputLabel >月額(7ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice7Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 8, true, false)}">
+						<apex:outputLabel >月額(8ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice8Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 9, true, false)}">
+						<apex:outputLabel >月額(9ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice9Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 10, true, false)}">
+						<apex:outputLabel >月額(10ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice10Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 11, true, false)}">
+						<apex:outputLabel >月額(11ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice11Str}" />
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!IF(product.periodOfUse >= 12, true, false)}">
+						<apex:outputLabel >月額(12ヶ月目)</apex:outputLabel>
+						<apex:outputText value="{!product.monthlyPrice12Str}" />
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+			</apex:outputPanel>
+		</apex:repeat>
+	</apex:pageBlock>
+</apex:page>

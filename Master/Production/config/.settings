@@ -1,0 +1,16 @@
+{
+    "projectName": "Production",
+    "username": "systemadministrator@bizreach.co.jp",
+    "id": "c8952390-06a0-11e6-8822-831e687fb465",
+    "namespace": "",
+    "environment": "production",
+    "loginUrl": "https://login.salesforce.com/",
+    "workspace": "/Users/wataru.ichikawa/Documents/MavensMate/Workspace2/biz-salesforce",
+    "subscription": [
+        "ApexClass",
+        "ApexComponent",
+        "ApexPage",
+        "ApexTrigger",
+        "StaticResource"
+    ]
+}

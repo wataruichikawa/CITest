@@ -1,0 +1,36 @@
+<apex:page standardController="Contract_Application_Information__c" docType="html-5.0" title="契約内容承認履歴" showHeader="false" sidebar="false"
+  extensions="ContractApplicationApprovalLogic" action="{!selectApprovalHistoryList}">
+  <apex:pageBlock mode="detail">
+    <apex:dataTable value="{!dtoList}" var="dto" id="theTable" styleClass="list" rowClasses="dataRow" headerClass="headerRow">
+      <apex:outputText value="{!dto}" id="theValue"/>
+      <apex:column width="10%">
+        <apex:facet name="header">状況</apex:facet>
+        <apex:outputText value="{!dto.approvalStatus}" rendered="{!dto.canApprove = false}"/>
+        <apex:outputLink value="{!$Site.BaseUrl}/apex/contractApplicationApproval?id={!cai.Id}" rendered="{!dto.canApprove}" target="_blank" style="color:blue">
+          {!dto.approvalStatus}
+        </apex:outputLink>
+      </apex:column>
+      <apex:column width="25%">
+        <apex:facet name="header">
+          <apex:outputText value="進捗" />
+        </apex:facet>
+        <apex:outputText value="{!dto.stepName}"/>
+      </apex:column>
+      <apex:column width="10%" >
+        <apex:facet name="header">承認者</apex:facet>
+        <apex:outputText value="{!dto.actorName}"/>
+      </apex:column>
+      <apex:column width="15%">
+        <apex:facet name="header">日付</apex:facet>
+        <apex:outputText value="{!dto.approvalDate}"/>
+      </apex:column>
+      <apex:column width="35%">
+        <apex:facet name="header">コメント</apex:facet>
+        <apex:outputText value="{!$Site.BaseUrl}{!dto.comments}"/>
+      </apex:column>
+    </apex:dataTable>
+    <apex:pageBlockButtons location="top" rendered="{!isButtonVisible}">
+      <input type="button" value="承認進捗を見る" onclick="window.open().location.href='{!$Site.BaseUrl}/apex/ContractApplicationApproval?id={!cai.Id}'"/>
+    </apex:pageBlockButtons>
+  </apex:pageBlock>
+</apex:page>

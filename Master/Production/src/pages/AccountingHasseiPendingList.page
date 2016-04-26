@@ -1,0 +1,36 @@
+<apex:page showHeader="false" sidebar="false" standardController="Contract_Application_Information__c" extensions="AccountingHasseiPendingExtension" action="{!selectList}">
+	<apex:pageBlock title="前工程未確定発生売上一覧">
+		<apex:pageBlockTable value="{!dtoList}" var="dto">
+			<apex:column >
+				<apex:facet name="header">取引先名</apex:facet>
+				<apex:outputText value="{!dto.accountName}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">サービス名</apex:facet>
+				<apex:outputText value="{!dto.serviceName}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">商談名</apex:facet>
+				<apex:outputText value="{!dto.opportunityName}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">ステータス</apex:facet>
+				<apex:outputText value="{!dto.status}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">担当営業</apex:facet>
+				<apex:outputText value="{!dto.salesPersonName}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">売上発生日</apex:facet>
+				<apex:outputText value="{0, date, yyyy/MM/dd}">
+					<apex:param value="{!dto.hasseiDate}" />
+				</apex:outputText>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header"></apex:facet>
+				<apex:outputLink value="{!$Site.BaseUrl}/apex/contractApplicationApproval?id={!dto.infoId}" target="_blank">発生売上承認ページ</apex:outputLink>
+			</apex:column>
+		</apex:pageBlockTable>
+	</apex:pageBlock>
+</apex:page>

@@ -1,0 +1,27 @@
+<apex:page controller="BatchExecuterContraller">
+    <apex:form >
+        <apex:pageBlock title="他社媒体掲載求人取り込みバッチ処理">
+            <apex:commandButton action="{!executeConvertCMJobToCustomObject3}" value="他社媒体掲載求人取り込みバッチ処理"/>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:form >
+        <apex:pageBlock title="取引先のリード集計更新バッチ">
+            <apex:commandButton action="{!executeUpdateAccountLeadShukei}" value="取引先のリード集計更新バッチ"/>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:form >
+        <apex:pageBlock title="取引先の活動管理集計更新バッチ">
+            <apex:commandButton action="{!executeUpdateAccountTaskShukei}" value="取引先の活動管理集計更新バッチ"/>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:form >
+        <apex:pageBlock title="活動履歴更新トリガー起動バッチ">
+            <apex:commandButton action="{!executeTaskAllUpdate}" value="活動履歴更新トリガー起動バッチ"/>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:form >
+        <apex:pageBlock title="取引先の商談訪問情報更新バッチ">
+            <apex:commandButton action="{!executeUpdateAccountOpportunityVisitData}" value="取引先の商談訪問情報更新バッチ"/>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

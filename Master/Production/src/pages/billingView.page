@@ -1,0 +1,50 @@
+<apex:page id="billingView" controller="BillingController">
+	<apex:pageBlock title="請求先" mode="detail" >
+		<apex:outputPanel id="jsi_billing_detail">
+			<apex:pageBlockSection columns="2">
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >請求先会社名</apex:outputLabel>
+					<apex:outputText >{!billingDto.companyName}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >郵便番号</apex:outputLabel>
+					<apex:outputText >{!billingDto.zipCode}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >都道府県名</apex:outputLabel>
+					<apex:outputText >{!billingDto.prefectureName}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >住所</apex:outputLabel>
+					<apex:outputText >{!billingDto.address}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >建物名</apex:outputLabel>
+					<apex:outputText >{!billingDto.buildingName}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >電話番号</apex:outputLabel>
+					<apex:outputText >{!billingDto.phoneNumber}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >部署</apex:outputLabel>
+					<apex:outputText >{!billingDto.contactDepartment}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >役職</apex:outputLabel>
+					<apex:outputText >{!billingDto.contactPosition}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >担当者名</apex:outputLabel>
+					<apex:outputText >{!billingDto.contactName}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+		</apex:outputPanel>
+	</apex:pageBlock>
+</apex:page>

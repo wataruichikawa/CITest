@@ -1,0 +1,34 @@
+<apex:page showHeader="false" sidebar="false" standardController="Opportunity" extensions="OpportunityApprovalIncompleteList" action="{!selectIncompleteList}">
+    <apex:form >
+        <apex:pageBlock title="{!$User.Alias}さんの承認待ち申込書一覧">
+            <apex:pageBlockTable value="{!oppList}" var="opp">
+                <apex:column >
+                    <apex:facet name="header">{!$ObjectType.Account.Fields.Name.label}</apex:facet>
+                    <apex:outputField value="{!opp.Account.Name}"/>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">{!$ObjectType.Opportunity.Fields.Name.label}</apex:facet>
+                    <apex:outputLink value="{!$Site.BaseUrl}/apex/OpportunityApproval?id={!opp.Id}" target="_blank" style="color:#015BA7">
+                        {!opp.Name}
+                    </apex:outputLink>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">申請者</apex:facet>
+                    <apex:outputField value="{!opp.Owner.Name}"/>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">{!$ObjectType.Opportunity.Fields.ContractCollectionDate__c.label}</apex:facet>
+                    <apex:outputField value="{!opp.ContractCollectionDate__c}"/>
+                </apex:column>
+                <apex:column >
+                    <apex:facet name="header">{!$ObjectType.Opportunity.Fields.UseStartDate__c.label}</apex:facet>
+                    <apex:outputField value="{!opp.UseStartDate__c}"/>
+                </apex:column>
+                <apex:column >  
+                    <apex:facet name="header">{!$ObjectType.Opportunity.Fields.Amount.label}</apex:facet>
+                    <apex:outputField value="{!opp.Amount}"/>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

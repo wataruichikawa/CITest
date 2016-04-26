@@ -1,0 +1,42 @@
+<apex:page showHeader="false" sidebar="false" standardController="Opportunity" extensions="NotYetRegisterContractList" action="{!selectList}">
+	<apex:pageBlock title="契約申込の登録待ち商談一覧">
+		<apex:pageBlockTable value="{!dtoList}" var="dto">
+			<apex:column >
+				<apex:facet name="header">取引先名</apex:facet>
+				<apex:outputLink value="/{!dto.accountId}" target="_blank">{!dto.accountName}</apex:outputLink>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">商談名</apex:facet>
+				<apex:outputLink value="/{!dto.opportunityId}" target="_blank">{!dto.opportunityName}</apex:outputLink>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">ステータス</apex:facet>
+				<apex:outputText value="{!dto.status}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">担当営業</apex:facet>
+				<apex:outputText value="{!dto.salesPersonName}" />
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">契約開始日</apex:facet>
+				<apex:outputText value="{0, date, yyyy/MM/dd}">
+					<apex:param value="{!dto.useStartDate}" />
+				</apex:outputText>
+			</apex:column>
+			<apex:column >
+				<apex:facet name="header">契約終了日</apex:facet>
+				<apex:outputText value="{0, date, yyyy/MM/dd}">
+					<apex:param value="{!dto.useEndDate}" />
+				</apex:outputText>
+			</apex:column>
+			<apex:column rendered="{!dto.status == '未登録'}">
+				<apex:facet name="header"></apex:facet>
+				<apex:outputLink value="{!$Site.BaseUrl}/apex/registerContractApplication?opportunityId={!dto.opportunityId}" target="_blank">契約申込ページ</apex:outputLink>
+			</apex:column>
+			<apex:column rendered="{!OR(dto.status == '不承認', dto.status == '契約申込書更新')}">
+				<apex:facet name="header"></apex:facet>
+				<apex:outputLink value="{!$Site.BaseUrl}/apex/editContractApplication?Id={!dto.infoId}" target="_blank">契約申込ページ</apex:outputLink>
+			</apex:column>
+		</apex:pageBlockTable>
+	</apex:pageBlock>
+</apex:page>

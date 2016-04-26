@@ -1,0 +1,5 @@
+<apex:page >
+
+<IFRAME title="コンテンツ" SRC="http://ap.salesforce.com/sol/public/search.jsp?orgId=00D10000000Ij6b" WIDTH="800" HEIGHT="600"></IFRAME>
+
+</apex:page>

@@ -1,0 +1,170 @@
+<apex:page standardController="Opportunity" docType="html-5.0" title="申込書の承認申請ページ" showHeader="true" sidebar="false"
+    extensions="OpportunityRequestApproval" action="{!requestApproval}">
+    <style>.rota{width:400px;}</style>
+    <apex:form id="form">
+        <apex:pageBlock id="block" title="申込書承認申請" mode="edit" rendered="{!canRequest}">
+            <apex:pageMessages />
+            <apex:pageBlockSection id="section" columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="採用プラン"/>
+                    <apex:outputPanel layout="block">
+                        <apex:repeat value="{!op.OpportunityLineItems}" var="oli">
+                            <apex:outputField value="{!oli.Product2Name__c}"/><br/>
+                        </apex:repeat>
+                    </apex:outputPanel>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="金額"/>
+                    <apex:outputField value="{!op.Amount}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="利用開始日"/>
+                    <apex:inputField style="width:130px" required="true" value="{!op.UseStartDate__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="利用期間(ヶ月)"/>
+                    <apex:inputField style="width:130px" required="true" value="{!op.HirePlanMonths__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!IF(op.ProposedService__c=='ESS', true, false)}">
+                    <apex:outputLabel value="利用終了日"/>
+                    <apex:inputField style="width:130px" required="true" value="{!op.UseEndDate__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!IF(op.ProposedService__c=='CRS', true, false)}">
+                    <apex:outputLabel value="導入MTG日時"/>
+                    <apex:inputField style="width:130px" required="{!IF(op.ProposedService__c=='CRS' && op.Type == '新規提案（過去未契約）', true, false)}" value="{!op.DounyuMtgDate__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem rendered="{!IF(op.ProposedService__c=='CRS' && op.Type == '既存提案（リピート・継続）', true, false)}">
+                    <apex:outputLabel value="{!$ObjectType.Opportunity.fields.IntroductionMTGDateIsBlank__c.label}"/>
+                    <apex:inputField value="{!op.IntroductionMTGDateIsBlank__c}"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_application" rendered="{!isApp}">
+                    <apex:outputLabel id="label_application" value="申込書PDF"/>
+                    <apex:inputFile id="jsi_application_form" required="false" value="{!applicationFormBlob}" fileName="{!applicationForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appBiz" rendered="{!isAppBiz}">
+                    <apex:outputLabel id="label_appBiz" value="{!$Label.ServiceBiz}申込書PDF"/>
+                    <apex:inputFile id="jsi_appBiz_form" required="false" value="{!appBizFormBlob}" fileName="{!appBizForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appCt" rendered="{!isAppCt}">
+                    <apex:outputLabel id="label_appCt" value="{!$Label.ServiceCt}申込書PDF"/>
+                    <apex:inputFile id="jsi_appCt_form" required="false" value="{!appCtFormBlob}" fileName="{!appCtForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appBizRs" rendered="{!isAppBizRs}">
+                    <apex:outputLabel id="label_appBizRs" value="{!$Label.ServiceBizRs}申込書PDF"/>
+                    <apex:inputFile id="jsi_appBizRs_form" required="false" value="{!appBizRsFormBlob}" fileName="{!appBizRsForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appCtRs" rendered="{!isAppCtRs}">
+                    <apex:outputLabel id="label_appCtRs" value="{!$Label.ServiceCtRs}申込書PDF"/>
+                    <apex:inputFile id="jsi_appCtRs_form" required="false" value="{!appCtRsFormBlob}" fileName="{!appCtRsForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appNk" rendered="{!isAppNk}">
+                    <apex:outputLabel id="label_appNk" value="{!$Label.ServiceNk}申込書PDF"/>
+                    <apex:inputFile id="jsi_appNk_form" required="false" value="{!appNkFormBlob}" fileName="{!appNkForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appBizW" rendered="{!isAppBizW}">
+                    <apex:outputLabel id="label_appBizW" value="{!$Label.ServiceBizW}申込書PDF"/>
+                    <apex:inputFile id="jsi_appBizW_form" required="false" value="{!appBizWFormBlob}" fileName="{!appBizWForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_appBos" rendered="{!isAppBos}">
+                    <apex:outputLabel id="label_appBos" value="{!$Label.ServiceBos}申込書PDF"/>
+                    <apex:inputFile id="jsi_appBos_form" required="false" value="{!appBosFormBlob}" fileName="{!appBosForm.Name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_certification" rendered="{!IF(op.ProposedService__c=='ESS' && isNewContract, true, false)}">
+                    <apex:outputLabel value="有料職業紹介業許可証"/>
+                    <apex:inputFile id="jsi_certification" required="false" value="{!certificationBlob}" fileName="{!certification.name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_agreement" rendered="{!IF(op.ProposedService__c=='ESS' && isNewContract, true, false)}">
+                    <apex:outputLabel value="プライバシーポリシー同意書"/>
+                    <apex:inputFile id="jsi_agreement" required="false" value="{!agreementBlob}" fileName="{!agreement.name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem id="item_evidence">
+                    <apex:outputLabel value="その他資料PDF（メールエビデンスや覚書など）"/>
+                    <apex:inputFile id="jsi_evidence" required="false" value="{!evidenceBlob}" fileName="{!evidence.name}" accept="pdf"/>
+                </apex:pageBlockSectionItem>
+                <apex:inputField value="{!op.CreditManagerApproval__c}"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="申請コメント"/>
+                    <apex:inputTextarea rows="3" style="width:500px" value="{!comments}" />
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="1" rendered="{!op.ProposedService__c=='CRS'}">
+                <apex:pageMessage summary="下記項目内容が運用担当に引き継がれます。記載内容が少ない場合、運用担当からDRCに確認が入り、お互い手間が発生してしまいますのでよろしくお願いいたします。" severity="info" strength="2"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockSection columns="2" rendered="{!op.ProposedService__c=='CRS'}">
+                <apex:inputTextarea rows="6" styleClass="rota" value="{!op.Introduction__c}"/>
+                <apex:inputTextarea rows="6" styleClass="rota" value="{!op.AccountInfo__c}"/>
+                <apex:inputTextarea rows="6" styleClass="rota" value="{!op.AppPositionRecruitTarget__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons id="buttons" location="bottom">
+                <apex:commandButton id="request_button" action="{!doRequest}" value="承認を申請する" onclick="return checkApplicationForm();"/>
+                <div id="btn_overlay" style="display:none;position:relative;top:-24px;width:92px;height:24px;background-color:#fff;opacity:0.5;"></div>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageBlock title="申込書承認申請" mode="detail" rendered="{!canRequest=false}">
+            <apex:pageBlockSection >
+                <apex:outputText style="font-style:italic" value="現在申請中か、{!$User.Alias}さんが商談の所有者ではないため申込書の申請が出来ません。">
+                </apex:outputText>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    <script type="text/javascript">
+        function checkApplicationForm(){
+            var applicationForm = document.getElementById("{!$Component.form.block.section.item_application.jsi_application_form}");
+            var appBizForm = document.getElementById("{!$Component.form.block.section.item_appBiz.jsi_appBiz_form}");
+            var appCtForm = document.getElementById("{!$Component.form.block.section.item_appCt.jsi_appCt_form}");
+            var appBizRsForm = document.getElementById("{!$Component.form.block.section.item_appBizRs.jsi_appBizRs_form}");
+            var appCtRsForm = document.getElementById("{!$Component.form.block.section.item_appCtRs.jsi_appCtRs_form}");
+            var appNkForm = document.getElementById("{!$Component.form.block.section.item_appNk.jsi_appNk_form}");
+            var appBizWForm = document.getElementById("{!$Component.form.block.section.item_appBizW.jsi_appBizW_form}");
+            var appBosForm = document.getElementById("{!$Component.form.block.section.item_appBos.jsi_appBos_form}");
+            var certification = document.getElementById("{!$Component.form.block.section.item_certification.jsi_certification}");
+            var agreement = document.getElementById("{!$Component.form.block.section.item_agreement.jsi_agreement}");
+            var evidence = document.getElementById("{!$Component.form.block.section.item_evidence.jsi_evidence}");
+
+            var result = { canSubmit : true, errorMsg : '' };
+
+            result = setResult(result, validatePdf(applicationForm, '申込書PDF', {!isApp}));
+            result = setResult(result, validatePdf(appBizForm, '{!$Label.ServiceBiz}申込書PDF', {!isAppBiz}));
+            result = setResult(result, validatePdf(appCtForm, '{!$Label.ServiceCt}申込書PDF', {!isAppCt}));
+            result = setResult(result, validatePdf(appBizRsForm, '{!$Label.ServiceBizRs}申込書PDF', {!isAppBizRS}));
+            result = setResult(result, validatePdf(appCtRsForm, '{!$Label.ServiceCtRs}申込書PDF', {!isAppCtRs}));
+            result = setResult(result, validatePdf(appNkForm, '{!$Label.ServiceNk}申込書PDF', {!isAppNk}));
+            result = setResult(result, validatePdf(appBizWForm, '{!$Label.ServiceBizW}申込書PDF', {!isAppBizW}));
+            result = setResult(result, validatePdf(appBosForm, '{!$Label.ServiceBos}申込書PDF', {!isAppBos}));
+            result = setResult(result, validatePdf(certification, '有料職業紹介業許可証', false));
+            result = setResult(result, validatePdf(agreement, 'プライバシーポリシー同意書', false));
+            result = setResult(result, validatePdf(evidence, 'その他資料PDF（メールエビデンスや覚書など）', false));
+
+            if(!result.canSubmit){
+                alert(result.errorMsg);
+            } else {
+                document.getElementById('btn_overlay').style.display = 'block';
+                setTimeout(function() {
+                    document.getElementById('btn_overlay').style.display = 'none';
+                }, 10000);
+                document.getElementById("{!$Component.form.block.buttons.request_button}").blur();
+            }
+            return result.canSubmit;
+        }
+        function validatePdf(pdfForm, pdfName, required) {
+            var cs = true;
+            var em = '';
+            if (required && (!pdfForm || pdfForm.value=='')) {
+                cs = false;
+                em = '・' + pdfName + 'を添付してください\r\n';
+            }
+            if (window.File && pdfForm && pdfForm.value!='') {
+                if (pdfForm.files[0].size > {!maxFileSize}) {
+                    cs = false;
+                    em = em + '・' + pdfName + 'は10MB以下のファイルを指定してください\r\n'
+                }
+            }
+            return {canSubmit : cs, errorMsg : em};
+        }
+        function setResult(rs1, rs2) {
+            rs1.canSubmit = rs1.canSubmit && rs2.canSubmit ? true : false;
+            rs1.errorMsg += rs2.errorMsg;
+            return rs1;
+        }
+    </script>
+</apex:page>

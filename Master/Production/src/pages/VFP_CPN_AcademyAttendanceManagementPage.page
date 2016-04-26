@@ -1,0 +1,43 @@
+<apex:page controller="CLS_CPN_AcademyAttendance" action="{!init}">
+	<apex:form >
+		<apex:selectList multiselect="false" size="1" value="{!campaignId}">
+			<apex:selectOptions value="{!options}"/>
+		</apex:selectList>
+		<apex:commandButton value="検索" action="{!search}"></apex:commandButton>
+	</apex:form>
+
+	<apex:form >
+		<apex:pageBlock title="出欠確認一覧">
+			<apex:commandButton value="保存" action="{!save}"/>
+			<apex:pageBlockTable value="{!campaignMemberList}" var="item">
+				<apex:column value="{!item.CompanyName__c}">
+					<apex:facet name="header">会社名</apex:facet>
+				</apex:column>
+				<apex:column value="{!item.LeadOrContactName__c}">
+					<apex:facet name="header">名前</apex:facet>
+				</apex:column>
+				<apex:column >
+					<apex:facet name="header">イベント参加状況</apex:facet>
+					<apex:selectList multiselect="false" size="1" value="{!item.academy_status__c}" disabled="{!item.academy_status__c=='参加'}">
+						<apex:selectOptions value="{!statusOoptions}"/>
+					</apex:selectList>
+				</apex:column>
+				<apex:column >
+					<apex:facet name="header">お礼メール種別</apex:facet>
+					<apex:selectList multiselect="false" size="1" value="{!item.CategoryOfEmail__c}">
+						<apex:selectOptions value="{!categoryOoptions}"/>
+					</apex:selectList>
+				</apex:column>
+				<apex:column >
+					<apex:facet name="header">プラスカ要否</apex:facet>
+					<apex:selectList multiselect="false" size="1" value="{!item.PluscouNecessity__c}">
+						<apex:selectOptions value="{!pluscouOoptions}"/>
+					</apex:selectList>
+				</apex:column>
+				<apex:column value="{!item.LeadOrContactEmail__c}">
+					<apex:facet name="header">メール</apex:facet>
+				</apex:column>
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

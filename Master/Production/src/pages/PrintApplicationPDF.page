@@ -1,0 +1,92 @@
+<apex:page docType="html-5.0" title="申込書出力" showHeader="false" sidebar="false" tabStyle="Account"
+  standardController="Opportunity" extensions="PrintApplicationPDF" action="{!initPrintApplicationInput}">
+  <apex:form >
+    <apex:sectionHeader title="申込書出力"/>
+    <apex:pageBlock title="申込書情報の編集" mode="edit" >
+      <apex:pageBlockButtons >
+        <apex:commandButton value="申込書出力" title="申込書出力" action="{!doPrintApplication}">
+          <apex:param name="id" value="{!dto.opp.Id}"/>
+        </apex:commandButton>
+        <apex:commandButton value="キャンセル" title="キャンセル" onclick="window.close();"></apex:commandButton>
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection title="企業情報" columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="申込日"/>
+          <apex:inputField required="false" value="{!dto.opp2.CloseDate}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="利用開始日"/>
+          <apex:inputField required="false" value="{!dto.opp.CloseDate}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem rendered="{!dto.usageEnd}">
+          <apex:outputLabel value="利用終了日"/>
+          <apex:inputField required="false" value="{!dto.opp3.CloseDate}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="会社名"/>
+          <apex:inputText style="width:600px;" maxlength="165" value="{!dto.companyName}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="会社名フリガナ"/>
+          <apex:inputText style="width:600px;" maxlength="61" value="{!dto.companyNameKana}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="郵便番号"/>
+          <apex:inputText style="width:60px;" maxlength="8" value="{!dto.companyPostCode}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="住所"/>
+          <apex:inputText style="width:600px;" maxlength="122" value="{!dto.companyAddress}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="電話番号"/>
+          <apex:inputText style="width:90px;" maxlength="40" value="{!dto.companyPhone}"/>
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+      <apex:pageBlockSection title="担当者情報" columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="部署・役職"/>
+          <apex:inputText style="width:600px;" maxlength="44" value="{!dto.department}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="氏名"/>
+          <apex:inputText style="width:374px;" maxlength="27" value="{!dto.name}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="氏名フリガナ"/>
+          <apex:inputText style="width:374px;" maxlength="27" value="{!dto.nameKana}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="E-mail"/>
+          <apex:input type="email" style="width:600px;" value="{!dto.email}"/>
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+      <apex:pageBlockSection title="請求先情報　　※企業情報と異なる場合は【必須】でご入力ください" columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="郵便番号"/>
+          <apex:inputText style="width:60px;" maxlength="8" value="{!dto.billingPostCode}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="住所"/>
+          <apex:inputText style="width:600px;" maxlength="122" value="{!dto.billingAddress}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="電話番号"/>
+          <apex:inputText style="width:90px;" maxlength="40" value="{!dto.billingPhone}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="部署・役職"/>
+          <apex:inputText style="width:600px;" maxlength="44" value="{!dto.billingDepartment}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="氏名"/>
+          <apex:inputText style="width:374px;" maxlength="27" value="{!dto.billingName}"/>
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="氏名フリガナ"/>
+          <apex:inputText style="width:374px;" maxlength="27" value="{!dto.billingNameKana}"/>
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

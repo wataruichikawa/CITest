@@ -1,0 +1,44 @@
+<apex:page showHeader="false" sidebar="false" standardController="BizTask__c" extensions="BizTaskListController">
+    <apex:form >
+        <apex:pageBlock title="私の未完了タスク一覧">
+            <apex:pageBlockTable value="{!BizTaskList}" var="bizTask">
+                    <apex:column >
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.Name.label}</apex:facet>
+                        <a href="/{!bizTask.id}" target="_BLANK">{!bizTask.Name}</a>
+                    </apex:column>
+                    <apex:column rendered="{!bos}">
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.AccountName__c.label}</apex:facet>
+                        {!bizTask.AccountName__c}
+                    </apex:column>
+                    <apex:column rendered="{!(!bos)}">
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.AccountName__c.label}</apex:facet>
+                        {!bizTask.Account__r.Name}
+                    </apex:column>
+                    <apex:column rendered="{!bos}">
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.CRSCandidateName__c.label}</apex:facet>
+                        {!bizTask.CRSCandidateName__c}
+                    </apex:column>
+                    <apex:column rendered="{!bos}">
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.CandidateCd__c.label}</apex:facet>
+                        {!bizTask.CandidateCd__c}
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.Status__c.label}</apex:facet>
+                        {!bizTask.Status__c}
+                    </apex:column>
+                    <apex:column rendered="{!(!bos)}">
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.Syousai__c.label}</apex:facet>
+                        {!bizTask.Syousai__c}
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.CreatedDate.label}</apex:facet>
+                        <apex:outputText value="{0, date, yyyy/MM/dd HH:mm}"><apex:param value="{!bizTask.CreatedDate}"></apex:param></apex:outputText>
+                    </apex:column>
+                    <apex:column >
+                        <apex:facet name="header">{!$ObjectType.BizTask__c.Fields.Kigen__c.label}</apex:facet>
+                        <apex:outputText value="{0, date, yyyy/MM/dd}"><apex:param value="{!bizTask.Kigen__c}"></apex:param></apex:outputText>
+                    </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

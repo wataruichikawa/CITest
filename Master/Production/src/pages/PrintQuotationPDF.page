@@ -1,0 +1,20 @@
+<apex:page docType="html-5.0" title="見積書出力" showHeader="false" sidebar="false" tabStyle="Account"
+  standardController="Opportunity" extensions="PrintApplicationPDF" action="{!initPrintQuotationInput}">
+  <apex:form >
+    <apex:sectionHeader title="見積書出力"/>
+    <apex:pageBlock title="見積書情報の編集" mode="edit">
+      <apex:pageBlockButtons >
+        <apex:commandButton value="見積書出力" title="見積書出力" action="{!doPrintQuotation}">
+          <apex:param name="id" value="{!dto.opp.Id}"/>
+        </apex:commandButton>
+        <apex:commandButton value="キャンセル" title="キャンセル" onclick="window.close();"></apex:commandButton>
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection title="見積情報" columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="お見積期限"/>
+          <apex:inputField required="false" value="{!dto.opp.CloseDate}"/>
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

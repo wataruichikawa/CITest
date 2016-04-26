@@ -1,0 +1,225 @@
+<apex:page standardController="Contract_Application_Information__c" extensions="ContractApplicationController">
+	<apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"/>
+	<style type="text/css">
+		.rep-tabList {
+			list-style: none;
+		    position: relative;
+		    z-index: 10;
+		    padding: 0 10px;
+		}
+		.rep-tabList li {
+			float: left;
+			margin-right: 2px;
+		    margin-left: 0px !important;
+		}
+		.rep-tabList a {
+		    display: block;
+		    width: 135px;
+		    min-height: 30px;
+		    text-align: center;
+		    border-width: 1px 1px 0 1px;
+		    border-style: solid;
+		    padding: 8px 0px;
+		    border-radius: 4px 4px 0 0;
+		    margin-top: 3px;
+		    text-decoration: none !important;
+		    font-weight: bold;
+		    border-color: #CFCFCF;
+		    color: #333333 !important;
+		}
+		.rep-tabList a:hover {
+		    border-color: #35B4E9;
+		    background-color: #BADCE7;
+		    color: #35B4E9 !important;
+		}
+		.rep-tabList .current a {
+		    border-color: #35B4E9;
+		    background-color: #D5EBF2;
+		    color: #35B4E9 !important;
+		}
+		.pdf-tabList {
+			list-style: none;
+		    position: relative;
+		    z-index: 10;
+		    padding: 0 10px;
+		}
+		.pdf-tabList li {
+			float: left;
+			margin-right: 2px;
+		    margin-left: 0px !important;
+		}
+
+    .inputLookup {
+      width: 320px;
+    }
+
+    .outputLookup {
+      border-style: solid;
+      border-color: #DDB929;
+      border-width: 2px 0px 2px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      background-color: #FFFFFF;
+    }
+
+    .outputLookupMstProduct {
+      border-style: solid;
+      border-color: #DDB929;
+      border-width: 2px 0px 2px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+      background-color: #FFFFFF;
+      padding-bottom: 4px;
+    }
+
+    .innerPageBlock {
+      border-top-color: #cfeef8
+    }
+  </style>
+  <article style="width:1800px;margin-left: auto;margin-right: auto;">
+		<section style="padding-top: 15px;width: 900px;float: left;">
+			<apex:outputPanel rendered="{! !isAlive}">
+				<apex:outputLabel style="color:red;">この契約は削除されています。</apex:outputLabel>
+			</apex:outputPanel>
+			<apex:include pageName="ApplicationInputFormView" />
+			<apex:include pageName="billingView" />
+			<apex:include pageName="productView" />
+			<apex:include pageName="contractOperatorMemoView" />
+			<apex:pageBlock title="商談情報">
+				<apex:pageBlockSection columns="2">
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >契約申込区分</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.contractType}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >担当営業</apex:outputLabel>
+						<apex:outputLink style="{!IF(companyAndSalesPersonDto.salesPersonName != null, '', 'color:red;')}" value="../{!companyAndSalesPersonDto.opportunityId}/e?retUrl={!companyAndSalesPersonDto.opportunityId}" disabled="{!companyAndSalesPersonDto.salesPersonName != null}">{!IF(companyAndSalesPersonDto.salesPersonName != null, companyAndSalesPersonDto.salesPersonName, companyAndSalesPersonDto.errorSalesPersonName)}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >担当営業部門名</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.salesPersonDepartment}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >担当営業テリトリー</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.salesTerritory}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >アポイント経由</apex:outputLabel>
+						<apex:outputLink style="{!IF(companyAndSalesPersonDto.appointmentType != null, '', 'color:red;')}" value="../{!companyAndSalesPersonDto.opportunityId}/e?retUrl={!companyAndSalesPersonDto.opportunityId}" disabled="{!companyAndSalesPersonDto.appointmentType != null}">{!IF(companyAndSalesPersonDto.appointmentType != null, companyAndSalesPersonDto.appointmentType, companyAndSalesPersonDto.errorAppointmentType)}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >アポイント日</apex:outputLabel>
+						<apex:outputtext value="{0, date, yyyy/MM/dd}">
+							<apex:param value="{!companyAndSalesPersonDto.appointmentAcquiredDate}"/>
+						</apex:outputtext>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >アポイント取得者</apex:outputLabel>
+						<apex:outputLink style="{!IF(companyAndSalesPersonDto.appointmentAcquiredName != null, '', 'color:red;')}" value="../{!companyAndSalesPersonDto.opportunityId}/e?retUrl={!companyAndSalesPersonDto.opportunityId}" disabled="{!companyAndSalesPersonDto.appointmentAcquiredName != null}">{!IF(companyAndSalesPersonDto.appointmentAcquiredName != null, companyAndSalesPersonDto.appointmentAcquiredName, companyAndSalesPersonDto.errorAppointmentAcquiredName)}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >アポイント取得チーム</apex:outputLabel>
+						<apex:outputLink style="{!IF(companyAndSalesPersonDto.appointmentAcquiredTeam != null, '', 'color:red;')}" value="../{!companyAndSalesPersonDto.opportunityId}/e?retUrl={!companyAndSalesPersonDto.opportunityId}" disabled="{!companyAndSalesPersonDto.appointmentAcquiredTeam != null}">{!IF(companyAndSalesPersonDto.appointmentAcquiredTeam != null, companyAndSalesPersonDto.appointmentAcquiredTeam, companyAndSalesPersonDto.errorAppointmentAcquiredTeam)}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >アポイント取得種別</apex:outputLabel>
+						<apex:outputLink style="{!IF(companyAndSalesPersonDto.appointmentAcquiredType != null, '', 'color:red;')}" value="../{!companyAndSalesPersonDto.opportunityId}/e?retUrl={!companyAndSalesPersonDto.opportunityId}" disabled="{!companyAndSalesPersonDto.appointmentAcquiredType != null}">{!IF(companyAndSalesPersonDto.appointmentAcquiredType != null, companyAndSalesPersonDto.appointmentAcquiredType, companyAndSalesPersonDto.errorAppointmentAcquiredType)}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >インバウンド</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.inboundType}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >会社概要</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.companyProfile}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >代表取締役</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.representative}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >会社規模</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.companySizeStr}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >設立日</apex:outputLabel>
+						<apex:outputtext value="{0, date, yyyy/MM/dd}">
+							<apex:param value="{!companyAndSalesPersonDto.establishmentDate}"/>
+						</apex:outputtext>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem rendered="{!companyAndSalesPersonDto.serviceType == 'CRS'}">
+						<apex:outputLabel >業種</apex:outputLabel>
+						<apex:outputLink style="{!IF(companyAndSalesPersonDto.industryCd != null, '', 'color:red;')}" value="../{!companyAndSalesPersonDto.accountId}/e?retUrl={!companyAndSalesPersonDto.opportunityId}" disabled="{!companyAndSalesPersonDto.industryCd != null}">{!IF(companyAndSalesPersonDto.industryCd != null, companyAndSalesPersonDto.industryCd, companyAndSalesPersonDto.errorIndustryCd)}</apex:outputLink>
+					</apex:pageBlockSectionItem>
+					<apex:pageBlockSectionItem >
+						<apex:outputLabel >企業URL</apex:outputLabel>
+						<apex:outputLabel >{!companyAndSalesPersonDto.companyUrl}</apex:outputLabel>
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>
+			</apex:pageBlock>
+			<apex:form >
+				<apex:outputPanel style="width:30%;margin:0 auto;" layout="block" rendered="{!isAlive}">
+					<apex:commandButton onclick="return edit();" value="編集" id="jsi_button_edit" />
+				</apex:outputPanel>
+			</apex:form>
+		</section>
+		<section style="padding-left:10px;width:890px;float:right;">
+			<ul id="jsi_tabList" class="rep-tabList">
+				<apex:repeat value="{!attachmentList}" var="at">
+				<li>
+					<a id="a_{!at.id}" href="javascript:void(0);">{!at.Name}</a>
+				</li>
+				</apex:repeat>
+			</ul>
+			<ul id="jsi_pdfList" class="pdf-tabList">
+				<apex:repeat value="{!attachmentList}" var="attachment">
+				<li>
+					<iframe class="jsc_iframe" id="file_{!attachment.Id}" name="{!attachment.Name}" src="{!$Site.BaseUrl}/servlet/servlet.FileDownload?file={!attachment.Id}" style="width:750px; height:900px;" frameborder="0"></iframe>
+				</li>
+				</apex:repeat>
+			</ul>
+		</section>
+	</article>
+  <script type="text/javascript">
+		$j = jQuery.noConflict();
+
+		$j('#jsi_tabList li').on('click', function(){
+			// クリックされたインデックス
+			var index = $j('#jsi_tabList li').index(this);
+			// コンテンツを一度すべて非表示
+			$j('#jsi_pdfList li').css('display', 'none');
+			// クリックされたタブと同じ順番のコンテンツを表示
+			$j('#jsi_pdfList li').eq(index).css('display', 'block');
+			// タブのセレクト(current)を付け直し
+			$j('#jsi_tabList li').removeClass('current');
+			$j(this).addClass('current');
+		});
+
+		$j(document).ready(function($) {
+			// コンテンツを一度すべて非表示し、一つ目の要素だけ表示
+			$j('#jsi_pdfList li').css('display', 'none');
+			$j('#jsi_pdfList li').eq(0).css('display', 'block');
+
+			// タブのセレクト(current)を付け直し
+			$j('#jsi_tabList li').removeClass('current');
+			$j('#jsi_tabList li').eq(0).addClass('current');
+
+		});
+		
+		function edit() {
+			var infoId = "{!infoId}";
+			if (infoId.length > 0) {
+				window.location.href = "/apex/editContractApplication?Id=" + infoId;
+			} else {
+				// 移動する場所がわからない場合はトップ画面へ遷移させる。
+				window.location.href = "/";
+			}
+			return false;
+		}
+		
+  </script>
+</apex:page>

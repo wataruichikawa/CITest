@@ -1,0 +1,21 @@
+<apex:page controller="CLS_TAB_TabListController" showHeader="true" sidebar="true">
+
+	<apex:sectionHeader title="管理者用" subtitle="カスタムタブリスト" />
+
+	<apex:form >
+      <apex:outputpanel >
+          <apex:pageBlock title="オブジェクトを選択">
+              <apex:selectList value="{!adminTabObjApi}" size="5">
+									<!--<apex:actionSupport action="{!refresh}" event="onchange" rerender="resultview"/>-->
+									<apex:actionSupport event="onchange" rerender="resultview"/>
+                  <apex:selectOptions value="{!adminTabPickList}"/>
+              </apex:selectList>
+          </apex:pageBlock>
+      </apex:outputpanel>
+  </apex:form>
+
+	<apex:outputPanel id="resultview">
+		<apex:enhancedList height="2000" type="{!adminTabObjApi}" />
+	</apex:outputPanel>
+
+</apex:page>

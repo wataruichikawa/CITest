@@ -1,0 +1,91 @@
+<apex:page id="applicationInputFormView" controller="ApplicationInputFormController">
+	<apex:pageBlock title="申込内容" mode="detail" >
+		<apex:pageBlockSection columns="2">
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >契約申込番号</apex:outputLabel>
+				<apex:outputText >{!inputFormDto.contractApplicationNo}</apex:outputText>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >契約サービス種別</apex:outputLabel>
+				<apex:outputText >{!inputFormDto.serviceType}</apex:outputText>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >契約申込日</apex:outputLabel>
+				<apex:outputLink style="{!IF(inputFormDto.collectionDate != null, '', 'color:red;')}" value="../{!inputFormDto.opportunityId}/e?retUrl={!inputFormDto.opportunityId}" disabled="{!inputFormDto.collectionDate != null}">
+					<apex:outputtext value="{0, date, yyyy/MM/dd}">
+						<apex:param value="{!inputFormDto.collectionDate}"/>
+					</apex:outputtext>
+					{!IF(inputFormDto.collectionDate == null && inputFormDto.opportunityId != null, inputFormDto.errorCollectionDate, '')}
+				</apex:outputLink>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >契約開始日</apex:outputLabel>
+				<apex:outputtext value="{0, date, yyyy/MM/dd}">
+					<apex:param value="{!inputFormDto.startDate}"/>
+				</apex:outputtext>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >契約終了日</apex:outputLabel>
+				<apex:outputtext value="{0, date, yyyy/MM/dd}">
+					<apex:param value="{!inputFormDto.endDate}"/>
+				</apex:outputtext>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >会社名</apex:outputLabel>
+				<apex:outputtext value="{!inputFormDto.companyName}" />
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >郵便番号</apex:outputLabel>
+				<apex:outputLink style="{!IF(inputFormDto.zipCode != null, '', 'color:red;')}" value="../{!inputFormDto.accountId}/e?retUrl={!inputFormDto.opportunityId}" disabled="{!inputFormDto.zipCode != null}">
+					{!IF(inputFormDto.zipCode == null && inputFormDto.opportunityId != null, inputFormDto.errorZipCode, inputFormDto.zipCode)}
+				</apex:outputLink>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >都道府県</apex:outputLabel>
+				<apex:outputLink style="{!IF(inputFormDto.prefecture != null, '', 'color:red;')}" value="../{!inputFormDto.accountId}/e?retUrl={!inputFormDto.opportunityId}" disabled="{!inputFormDto.prefecture != null}">
+					{!IF(inputFormDto.prefecture == null && inputFormDto.opportunityId != null, inputFormDto.errorPrefecture, inputFormDto.prefecture)}
+				</apex:outputLink>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >住所1</apex:outputLabel>
+				<apex:outputLink style="{!IF(inputFormDto.address1 != null, '', 'color:red;')}" value="../{!inputFormDto.accountId}/e?retUrl={!inputFormDto.opportunityId}" disabled="{!inputFormDto.address1 != null}">
+					{!IF(inputFormDto.address1 == null && inputFormDto.opportunityId != null, inputFormDto.errorAddress1, inputFormDto.address1)}
+				</apex:outputLink>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >住所2</apex:outputLabel>
+				<apex:outputText >{!inputFormDto.address2}</apex:outputText>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >部署</apex:outputLabel>
+				<apex:outputText >{!inputFormDto.contactDepartment}</apex:outputText>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >役職</apex:outputLabel>
+				<apex:outputText >{!inputFormDto.contactDepartment}</apex:outputText>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >担当者名</apex:outputLabel>
+				<apex:outputLink style="{!IF(inputFormDto.contactName != null, '', 'color:red;')}" value="../{!inputFormDto.accountId}/e?retUrl={!inputFormDto.opportunityId}" disabled="{!inputFormDto.contactName != null}">
+					{!IF(inputFormDto.contactName == null && inputFormDto.opportunityId != null, inputFormDto.errorContactName, inputFormDto.contactName)}
+				</apex:outputLink>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >電話番号</apex:outputLabel>
+				<apex:outputLink style="{!IF(inputFormDto.phoneNumber != null, '', 'color:red;')}" value="../{!inputFormDto.accountId}/e?retUrl={!inputFormDto.opportunityId}" disabled="{!inputFormDto.phoneNumber != null}">
+					{!IF(inputFormDto.phoneNumber == null && inputFormDto.opportunityId != null, inputFormDto.errorPhoneNumber, inputFormDto.phoneNumber)}
+				</apex:outputLink>
+			</apex:pageBlockSectionItem>
+			<apex:pageBlockSectionItem >
+				<apex:outputLabel >Eメールアドレス</apex:outputLabel>
+				<apex:outputText >{!inputFormDto.emailAddress}</apex:outputText>
+			</apex:pageBlockSectionItem>
+		</apex:pageBlockSection>
+	</apex:pageBlock>
+</apex:page>

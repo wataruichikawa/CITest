@@ -1,0 +1,22 @@
+<apex:page controller="ContractOperatorMemoController">
+	<apex:form >
+		<apex:pageBlock title="その他入力項目" mode="detail">
+			<apex:pageBlockSection columns="2">
+				<apex:pageBlockSectionItem rendered="{! !ISBLANK(contractOperatorMemoDto.parentContractApplicationNo)}">
+					<apex:outputLabel >親契約の申込番号</apex:outputLabel>
+					<apex:outputText >{!contractOperatorMemoDto.parentContractApplicationNo}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem rendered="{! !ISBLANK(contractOperatorMemoDto.parentContractApplicationNo)}">
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >メモ</apex:outputLabel>
+					<apex:outputText >{!contractOperatorMemoDto.memo}</apex:outputText>
+				</apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+					<apex:outputLabel >申送事項</apex:outputLabel>
+					<apex:outputText >{!contractOperatorMemoDto.transferMemo}</apex:outputText>
+				</apex:pageBlockSectionItem>
+			</apex:pageBlockSection>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

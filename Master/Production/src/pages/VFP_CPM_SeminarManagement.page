@@ -1,0 +1,712 @@
+<apex:page controller="CLS_CPM_SeminarManagement" docType="html-5.0" showHeader="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" standardStylesheets="false">
+<head>
+  <apex:stylesheet value="{!URLFOR($Resource.spread_for_gridTable, './spread/handsontable.full.min.css')}"/>
+  <!--<apex:stylesheet value="{!URLFOR($Resource.spread_for_gridTable, './spread/bootstrap.min.css')}"/>
+  <apex:stylesheet value="{!URLFOR($Resource.spread_for_gridTable, './spread/handsontable.bootstrap.css')}"/>-->
+  <apex:includeScript value="{!URLFOR($Resource.spread_for_gridTable, './spread/jquery-2.2.2.min.js')}"/>
+  <!--<apex:includeScript value="{!URLFOR($Resource.spread_for_gridTable, './spread/bootstrap.min.js')}"/>-->
+  <apex:includeScript value="{!URLFOR($Resource.spread_for_gridTable,'./spread/handsontable.full.min.js')}"/>
+
+
+  <style>
+    #targetMenu, #actionMenu{
+      font-size: 130%;
+    }
+    #message{
+      font-size: 130%;
+      color: blue;
+      font-weight: bold;
+    }
+    #sfa{
+      font-size: 90%;
+    }
+    #loading{
+        display: none;
+    }
+
+    /*
+    body{
+      margin-right: auto;
+      margin-left : auto;
+      width:1366px;
+    }
+    */
+
+    table tr {
+      height:1em;
+    }
+
+    .handsontable .currentRow {
+      background-color: #EEFFFF;
+    }
+
+    .handsontable .currentCol {
+      background-color: #EEFFFF;
+    }
+
+  </style>
+</head>
+
+<body>
+<header>
+<nav>
+
+<form name="mainForm">
+  <apex:outputLink value="{!topPageUrl}" target="_blank">
+    <apex:image url="{!$Resource.sf_icon}" width="50" height="30"></apex:image>
+  </apex:outputLink>
+
+  <select name="targetMenu" id="targetMenu">
+    <apex:repeat value="{!cpListOptions}" var="o">
+      <option value="{!o.value}">{!o.label}</option>
+    </apex:repeat>
+  </select>
+  <select name="actionMenu" id="actionMenu">
+    <apex:repeat value="{!actionListOptions}" var="o">
+      <option value="{!o.value}">{!o.label}</option>
+    </apex:repeat>
+  </select>
+  <button type="button" style="width:100px;background-color:#DDDDFF;font-size:130%;font-weight:bold" id="getGridData">表示</button>
+  <button type="button" style="width:100px;background-color:#FFDDDD;font-size:130%;font-weight:bold" id="saveActive">保存</button>
+  <button type="button" style="color:#999999;width:100px;background-color:#EEEEEE;font-size:130%;font-weight:bold" id="saveNonActive">保存</button>
+</form>
+
+<div id="loading">
+<apex:image url="{!$Resource.now_loading}"></apex:image>
+</div>
+
+</nav>
+
+
+</header>
+
+<div id="errmsg"></div>
+<div id="message"><br/></div>
+<div id="sfa"></div>
+
+<script>
+$(function(){
+    setInitView();
+});
+$('#getGridData').click(function(){
+    getGridData();
+});
+$('#saveActive').click(function(){
+    if(!confirm('保存しますか？')){
+        /* キャンセルの時の処理 */
+        return false;
+    }else{
+        /*　OKの時の処理 */
+        saveData();
+    }
+});
+
+
+//変数定義
+var container1 = document.getElementById('sfa');
+var hot1;
+var cpmSeminarSettings;
+var cpmAcademySettings;
+var ssrSeminarSettings;
+var emailRegexp = /^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*@\[?([\d\w\.-]+)]?$/;
+var phoneRegexp = /^\d{2,5}-\d{1,4}-\d{4}$/;
+var idRegexp = /(^[a-zA-Z0-9]{15}$|^[a-zA-Z0-9]{18}$)/;
+var domainUrl = '{!domainUrl}';
+var selectedCpName = '';
+var academyOrSeminar = '';
+var attendanceOrSurvey = '';
+var dumpData = [];
+
+// 出席管理の選択リスト用バリデーション
+var academy_status__cRegexp = /--なし--|応募のみ|参加|不参加|プラスカ付与済/;
+var CategoryOfEmail__cRegexp = /--なし--|送信|採用+母集団/;
+var PluscouNecessity__cRegexp = /--なし--|プラスカ付与あり|プラスカ付与なし/;
+var IS__cRegexp = /未判定|アプローチ中|アポ獲得|セミナー送客|コンタクト不可（フォロー終了）/;
+
+
+// セミナーアンケート結果の選択リスト用バリデーション
+var Position__cRegexp = /--なし--|経営者|役員|部長|課長|主任\/係長|一般社員/;
+var Industry__cRegexp = /--なし--|IT・インターネット|メーカー|商社|流通・小売・サービス|コンサルティング|マスコミ・メディア|エンターテイメント|金融|建築・不動産|メディカル|インフラ|その他/;
+var EmployeeNumber__cRegexp = /--なし--|1～30人|31～100人|101～500人|501～5,000人|5,001人以上|非公開/;
+var AdoptionSupportService__cRegexp = /--なし--|新たに採用支援サービスの選定を行っている|新たに採用支援サービスの利用を検討しており、情報収集をしている|新たに採用支援サービスを利用する予定はない/;
+var know_was_triggered__cRegexp = /--なし--|CMを見て|Web広告を見て|Web上の記事を読んで|雑誌・新聞を見て|DM・チラシを見て|インターネットで検索して|周囲からの口コミ|その他/;
+
+
+  //---------- 日付範囲設定 ----------
+function getGridData(){
+    $("#loading").fadeIn();
+    attendanceOrSurvey = getSelectedMenu('actionMenu');
+
+    if(hot1 != undefined){
+      $("#sfa").fadeOut();
+      hot1.destroy();
+      hot1 = undefined;
+    }
+
+    //---------- messageを初期化 --------
+    document.getElementById('message').innerHTML = '<br/>';
+    //---------- 読み込み ----------
+    var tMenuId = '';
+    tMenuId = getSelectedMenu('targetMenu');
+
+    Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.CLS_CPM_SeminarManagement.getCampaignName}',
+      tMenuId,
+      function(resultCpName){
+        var selectedCpName = '';
+        selectedCpName = resultCpName;
+        if(selectedCpName.match(/母集団形成編/) || selectedCpName.match(/採用決定向上編/)){
+            academyOrSeminar = 'DRA';
+        }else{
+            academyOrSeminar = 'セミナー';
+        }
+
+        if(attendanceOrSurvey == '出席管理'){
+            Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.CLS_CPM_SeminarManagement.getCampaignMember}',
+              tMenuId,
+              function(result){
+                var gridData = [];
+                $(result).each(function (i) {
+                  //ここでSFの配列をcreateArrayElementメソッド経由でJSの配列に変換
+                  gridData.push(createArrayElement(this, academyOrSeminar));
+                });
+                $("#loading").fadeOut();
+                $("#sfa").fadeOut();
+                if (academyOrSeminar == 'DRA'){
+                    hot1 = new Handsontable(container1, cpmAcademySettings);
+                }else if (academyOrSeminar == 'セミナー'){
+                    hot1 = new Handsontable(container1, cpmSeminarSettings);
+                }
+
+                hot1.loadData(gridData);
+                $("#sfa").fadeIn();
+                // dumpDataに現データを格納
+                dumpData = hot1.getData();
+
+              }
+            );
+        }else if(attendanceOrSurvey == 'アンケート入力'){
+            if (academyOrSeminar == 'DRA'){
+                document.getElementById('message').innerHTML = 'ダイレクトリクルーティングアカデミーにはアンケートはございません。';
+            }else if (academyOrSeminar == 'セミナー'){
+                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.CLS_CPM_SeminarManagement.getSeminarSurveyResult}',
+                  tMenuId,
+                  function(result){
+                    var gridData = [];
+                    $(result).each(function (i) {
+                      //ここでSFの配列をcreateArrayElementメソッド経由でJSの配列に変換TriggerInvalid__c
+                      gridData.push(createSsrArrayElement(this));
+                    });
+                    $("#loading").fadeOut();
+                    $("#sfa").fadeOut();
+                    hot1 = new Handsontable(container1, ssrSeminarSettings);
+                    hot1.loadData(gridData);
+                    $("#sfa").fadeIn();
+                    // dumpDataに現データを格納
+                    dumpData = hot1.getData();
+                  }
+                );
+            }
+        }
+      }
+    );
+}
+
+  //---------- データ読み込み（セミナー・DRA参加者管理） ----------
+  //---キャンペーンメンバー用のオブジェクト定義----
+  function CampaignMember(sObj){
+    // Null時の定義はここに記述
+    this.Id = sObj.Id ? sObj.Id : null;
+    this.leadOwnerOrQueue__c = sObj.leadOwnerOrQueue__c ? sObj.leadOwnerOrQueue__c : '-';
+    this.LeadOrContactId__c = sObj.LeadOrContactId__c ? sObj.LeadOrContactId__c : null;
+    this.CompanyName__c = sObj.CompanyName__c || '';
+    this.Name = sObj.Name || '';
+    this.academy_status__c = sObj.academy_status__c || '--なし--';
+    this.CategoryOfEmail__c = sObj.CategoryOfEmail__c || '--なし--';
+    this.PluscouNecessity__c = sObj.PluscouNecessity__c || '--なし--';
+    this.LeadOrContactEmail__c = sObj.LeadOrContactEmail__c ? sObj.LeadOrContactEmail__c : null;
+    this.IS__c = sObj.IS__c || '未判定';
+    this.LeadOrContactPhone__c = sObj.LeadOrContactPhone__c || '';
+    this.LeadOrContactDepartment__c = sObj.LeadOrContactDepartment__c || '';
+    this.LeadOrContactTitle__c = sObj.LeadOrContactTitle__c || '';
+    this.LeadOrContactIndustry__c = sObj.LeadOrContactIndustry__c || '';
+    this.LeadOrContactEmployees__c = sObj.LeadOrContactEmployees__c || '';
+    this.AdoptionSupportService__c = sObj.AdoptionSupportService__c || '';
+    this.Path__c = sObj.Path__c || '';
+    this.Inquiry__c = sObj.Inquiry__c || '';
+
+  }
+
+
+
+  var createArrayElement = function(result, AcaOrSemi){
+    var dataObj = new CampaignMember({
+      //---ここで値をJSのオブジェクトに変換---
+      Id : result.Id,
+      leadOwnerOrQueue__c : result.leadOwnerOrQueue__c,
+      LeadOrContactId__c : result.LeadOrContactId__c,
+      CompanyName__c : result.CompanyName__c,
+      Name : result.Name,
+      academy_status__c : result.academy_status__c,
+      CategoryOfEmail__c : result.CategoryOfEmail__c,
+      PluscouNecessity__c : result.PluscouNecessity__c,
+      LeadOrContactEmail__c : result.LeadOrContactEmail__c,
+      IS__c : result.IS__c,
+      LeadOrContactPhone__c : result.LeadOrContactPhone__c,
+      LeadOrContactDepartment__c : result.LeadOrContactDepartment__c,
+      LeadOrContactTitle__c : result.LeadOrContactTitle__c,
+      LeadOrContactIndustry__c : result.LeadOrContactIndustry__c,
+      LeadOrContactEmployees__c : result.LeadOrContactEmployees__c,
+      AdoptionSupportService__c : result.AdoptionSupportService__c,
+      Path__c : result.Path__c,
+      Inquiry__c : result.Inquiry__c
+    });
+
+    //--- ここで変換されたdataObjの値から、配列作成 ※※※データの事前加工はここで行う---
+    var ary1 = {};
+    if (AcaOrSemi == 'DRA'){
+        ary1["id"] = dataObj.Id;
+        ary1["CompanyName__c"] = dataObj.CompanyName__c;
+        ary1["name"] = '<a href="' + domainUrl + dataObj.LeadOrContactId__c + '" target="_blank">' + dataObj.Name + '</a>';
+        ary1["academy_status__c"] = dataObj.academy_status__c;
+        ary1["CategoryOfEmail__c"] = dataObj.CategoryOfEmail__c;
+        ary1["PluscouNecessity__c"] = dataObj.PluscouNecessity__c;
+        ary1["LeadOrContactEmail__c"] = dataObj.LeadOrContactEmail__c;
+        ary1["IS__c"] = dataObj.IS__c;
+    }else if (AcaOrSemi == 'セミナー'){
+        ary1["id"] = dataObj.Id;
+        ary1["leadOwnerOrQueue__c"] = dataObj.leadOwnerOrQueue__c;
+        ary1["CompanyName__c"] = dataObj.CompanyName__c;
+        ary1["name"] = '<a href="' + domainUrl + dataObj.LeadOrContactId__c + '" target="_blank">' + dataObj.Name + '</a>';
+        ary1["academy_status__c"] = dataObj.academy_status__c;
+        ary1["IS__c"] = dataObj.IS__c;
+        ary1["LeadOrContactPhone__c"] = dataObj.LeadOrContactPhone__c;
+        ary1["LeadOrContactDepartment__c"] = dataObj.LeadOrContactDepartment__c;
+        ary1["LeadOrContactTitle__c"] = dataObj.LeadOrContactTitle__c;
+        ary1["LeadOrContactIndustry__c"] = dataObj.LeadOrContactIndustry__c;
+        ary1["LeadOrContactEmployees__c"] = dataObj.LeadOrContactEmployees__c;
+        ary1["AdoptionSupportService__c"] = dataObj.AdoptionSupportService__c;
+        ary1["Path__c"] = dataObj.Path__c;
+        ary1["Inquiry__c"] = dataObj.Inquiry__c;
+    }
+    return ary1;
+  }
+
+
+  //----データ読み込み（セミナーアンケート結果）---------------
+  //---キャンペーンメンバー用のオブジェクト定義----
+  function Seminar_Survey_Result__c(sObj){
+    // Null時の定義はここに記述
+    this.Id = sObj.Id ? sObj.Id : null;
+    this.CampaignMemberId__c = sObj.CampaignMemberId__c ? sObj.CampaignMemberId__c : null;
+    this.CampaignId__c = sObj.CampaignId__c ? sObj.CampaignId__c : null;
+    this.LeadId__c = sObj.LeadId__c ? sObj.LeadId__c : null;
+    this.ContactId__c = sObj.ContactId__c ? sObj.ContactId__c : null;
+    this.Company__c = sObj.Company__c || '';
+    this.Name__c = sObj.Name__c || '';
+    this.Email__c = sObj.Email__c || '';
+	//this.Department__c = sObj.Department__c || '';
+    //this.Phone__c = sObj.Phone__c || '';
+    //this.Position__c = sObj.Position__c || '--なし--';
+    //this.Industry__c = sObj.Industry__c || '--なし--';
+    //this.EmployeeNumber__c = sObj.EmployeeNumber__c || '--なし--';
+    this.AdoptionSupportService__c = sObj.AdoptionSupportService__c || '--なし--';
+    //this.know_was_triggered__c = sObj.know_was_triggered__c || '--なし--';
+    this.Inquiry__c = sObj.Inquiry__c || '';
+    this.Q1__c = sObj.Q1__c || '';
+    this.A1__c = sObj.A1__c || '';
+    this.Q2__c = sObj.Q2__c || '';
+    this.A2__c = sObj.A2__c || '';
+    this.Q3__c = sObj.Q3__c || '';
+    this.A3__c = sObj.A3__c || '';
+  }
+
+  var createSsrArrayElement = function(result){
+    var dataObj = new Seminar_Survey_Result__c({
+      //---ここで値をJSのオブジェクトに変換---
+      Id : result.Id,
+      CampaignMemberId__c : result.CampaignMemberId__c,
+      CampaignId__c : result.CampaignId__c,
+      LeadId__c : result.LeadId__c,
+      ContactId__c : result.ContactId__c,
+      Company__c : result.Company__c,
+      Name__c : result.Name__c,
+      Email__c : result.Email__c,
+	  //Department__c : result.Department__c,
+      //Phone__c : result.Phone__c,
+      //Position__c : result.Position__c,
+      //Industry__c : result.Industry__c,
+      //EmployeeNumber__c : result.EmployeeNumber__c,
+      AdoptionSupportService__c : result.AdoptionSupportService__c,
+      //know_was_triggered__c : result.know_was_triggered__c,
+      Inquiry__c : result.Inquiry__c,
+      Q1__c : result.Q1__c,
+      A1__c : result.A1__c,
+      Q2__c : result.Q2__c,
+      A2__c : result.A2__c,
+      Q3__c : result.Q3__c,
+      A3__c : result.A3__c
+    });
+
+    //--- ここで変換されたdataObjの値から、配列作成 ※※※データの事前加工はここで行う---
+    var ary1 = {};
+    ary1["id"] = dataObj.Id;
+    ary1["CampaignMemberId__c"] = dataObj.CampaignMemberId__c;
+    ary1["CampaignId__c"] = dataObj.CampaignId__c;
+    ary1["LeadId__c"] = dataObj.LeadId__c;
+    ary1["ContactId__c"] = dataObj.ContactId__c;
+    ary1["Company__c"] = dataObj.Company__c;
+    ary1["Name__c"] = dataObj.Name__c;
+    ary1["Email__c"] = dataObj.Email__c;
+	//ary1["Department__c"] = dataObj.Department__c;
+    //ary1["Phone__c"] = dataObj.Phone__c;
+    //ary1["Industry__c"] = dataObj.Industry__c;
+    //ary1["Position__c"] = dataObj.Position__c;
+    //ary1["EmployeeNumber__c"] = dataObj.EmployeeNumber__c;
+    ary1["AdoptionSupportService__c"] = dataObj.AdoptionSupportService__c;
+    //ary1["know_was_triggered__c"] = dataObj.know_was_triggered__c;
+    ary1["Inquiry__c"] = dataObj.Inquiry__c;
+    ary1["Q1__c"] = dataObj.Q1__c;
+    ary1["A1__c"] = dataObj.A1__c;
+    ary1["Q2__c"] = dataObj.Q2__c;
+    ary1["A2__c"] = dataObj.A2__c;
+    ary1["Q3__c"] = dataObj.Q3__c;
+    ary1["A3__c"] = dataObj.A3__c;
+    return ary1;
+  }
+
+
+  //---------- データ保存 ----------
+  function saveData(){
+    $("#loading").fadeIn();
+    var DataList = [];
+    var rawData = hot1.getData();
+    var cnt = 0;
+    var result = 0;
+    for(var i=0, len1=rawData.length; i<len1; i++) {
+        var rawDataString = JSON.stringify(rawData[i]);
+        var changedRowFlag = false;
+        for(var j=0, len2=dumpData.length; j<len2; j++){
+            var dumpDataString = JSON.stringify(dumpData[j]);
+            if(rawDataString === dumpDataString){
+                changedRowFlag = true;
+                break;
+            }
+        }
+        if(changedRowFlag == false){
+            DataList.push(createObjectFromArray(rawData[i]));
+            cnt+=1;
+        }
+    }
+
+      if(cnt!=0){
+          if(attendanceOrSurvey == '出席管理'){
+              Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.CLS_CPM_SeminarManagement.saveCpmRecords}',
+                DataList,
+                a = function(result,event){
+                  //console.debug(event);
+                  if (event.type === 'exception') {                         // すべてtype=rpcとなるようなので意味がなさそう。errorがキャッチアップできない。
+                    alert("保存エラー" + event.message);
+                  } else {
+                    $("#loading").fadeOut();
+                    document.getElementById('message').innerHTML = cnt+'件　保存完了';
+                    //alert(cnt + "件更新　保存完了");
+                    // dumpDataに現データを格納
+                    dumpData = hot1.getData();
+                  }
+                }
+              );             // Visualforce.remoting....
+              $("#sfa").fadeOut();
+              $("#sfa").fadeIn();
+          }else if(attendanceOrSurvey == 'アンケート入力'){
+              Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.CLS_CPM_SeminarManagement.saveSsrRecords}',
+                DataList,
+                a = function(result,event){
+                  //console.debug(event);
+                  if (event.type === 'exception') {                         // すべてtype=rpcとなるようなので意味がなさそう。errorがキャッチアップできない。
+                    alert("保存エラー" + event.message);
+                  } else {
+                    $("#loading").fadeOut();
+                    document.getElementById('message').innerHTML = cnt+'件　保存完了';
+                      //alert(cnt + "件更新　保存完了");
+                      // dumpDataに現データを格納
+                      dumpData = hot1.getData();
+                  }
+                }
+              );             // Visualforce.remoting....
+              $("#sfa").fadeOut();
+              $("#sfa").fadeIn();
+          }
+
+      } else {
+          //alert("更新対象なし");
+        $("#loading").fadeOut();
+        document.getElementById('message').innerHTML = '> 更新対象なし';
+      }                // if cnt!=0
+  }
+
+    var createObjectFromArray = function(array){
+        var saveObj = {};
+        if (attendanceOrSurvey == '出席管理'){
+            if (academyOrSeminar == 'DRA'){
+                saveObj = new cpmObject({
+                    // ここでSF側にupdateするカラムのみを指定する（読み取り専用カラムが混ざるとupdateに失敗するため）
+                    Id : array[0],
+                    academy_status__c : array[3],
+                    CategoryOfEmail__c : array[4],
+                    PluscouNecessity__c : array[5],
+                    IS__c : array[6]
+                });
+            }else if (academyOrSeminar == 'セミナー'){
+                saveObj = new cpmObject({
+                    // ここでSF側にupdateするカラムのみを指定する（読み取り専用カラムが混ざるとupdateに失敗するため）
+                    Id : array[0],
+                    academy_status__c : array[4],
+                    IS__c : array[5]
+                });
+            }
+        }else if (attendanceOrSurvey == 'アンケート入力'){
+            if (academyOrSeminar == 'DRA'){
+                // DRAのアンケートは存在しないため記述なし
+            }else if (academyOrSeminar == 'セミナー'){
+                saveObj = new ssrObject({
+                    // ここでSF側にupdateするカラムのみを指定する（読み取り専用カラムが混ざるとupdateに失敗するため）
+                    Id : array[0],
+                    CampaignMemberId__c : array[1],
+                    CampaignId__c : array[2],
+                    LeadId__c : array[3],
+                    ContactId__c : array[4],
+                    Company__c : array[5],
+                    Name__c : array[6],
+                    Email__c : array[7],
+					//Department__c : array[8],
+                    //Phone__c : array[9],
+                    //Position__c : array[10],
+                    //Industry__c : array[11],
+                    //EmployeeNumber__c : array[12],
+                    AdoptionSupportService__c : array[8],
+                    //know_was_triggered__c : array[14],
+                    Inquiry__c : array[9],
+                    Q1__c : array[10],
+                    A1__c : array[11],
+                    Q2__c : array[12],
+                    A2__c : array[13],
+                    Q3__c : array[14],
+                    A3__c : array[15]
+                });
+            }
+        }
+        return saveObj;
+    }
+
+  function cpmObject(sObj){
+    // Null時の定義はここに記述
+    this.Id = sObj.Id ? sObj.Id : null;
+    this.academy_status__c = sObj.academy_status__c == '--なし--' ? '' : sObj.academy_status__c;
+    this.CategoryOfEmail__c = sObj.CategoryOfEmail__c == '--なし--' ? '' : sObj.CategoryOfEmail__c;
+    this.PluscouNecessity__c = sObj.PluscouNecessity__c == '--なし--' ? '' : sObj.PluscouNecessity__c;
+    this.IS__c = sObj.IS__c;
+  }
+
+
+function ssrObject(sObj){
+    // Null時の定義はここに記述
+    this.Id = sObj.Id ? sObj.Id : null;
+    this.CampaignMemberId__c = sObj.CampaignMemberId__c ? sObj.CampaignMemberId__c : null;
+    this.CampaignId__c = sObj.CampaignId__c ? sObj.CampaignId__c : null;
+    this.LeadId__c = sObj.LeadId__c ? sObj.LeadId__c : null;
+    this.ContactId__c = sObj.ContactId__c ? sObj.ContactId__c : null;
+    this.Company__c = sObj.Company__c || '';
+    this.Name__c = sObj.Name__c || '';
+    this.Email__c = sObj.Email__c || '';
+	//this.Department__c = sObj.Department__c || '';
+    //this.Phone__c = sObj.Phone__c || '';
+    //this.Position__c = sObj.Position__c == '--なし--' ? '' : sObj.Position__c;
+    //this.Industry__c = sObj.Industry__c == '--なし--' ? '' : sObj.Industry__c;
+    //this.EmployeeNumber__c = sObj.EmployeeNumber__c == '--なし--' ? '' : sObj.EmployeeNumber__c;
+    this.AdoptionSupportService__c = sObj.AdoptionSupportService__c == '--なし--' ? '' : sObj.AdoptionSupportService__c;
+    //this.know_was_triggered__c = sObj.know_was_triggered__c == '--なし--' ? '' : sObj.know_was_triggered__c;
+    this.Inquiry__c = sObj.Inquiry__c || '';
+    this.Q1__c = sObj.Q1__c || '';
+    this.A1__c = sObj.A1__c || '';
+    this.Q2__c = sObj.Q2__c || '';
+    this.A2__c = sObj.A2__c || '';
+    this.Q3__c = sObj.Q3__c || '';
+    this.A3__c = sObj.A3__c || '';
+}
+
+
+cpmSeminarSettings = {
+    rowHeaders: true,
+    colHeaders: true,
+    currentRowClassName: 'currentRow',
+    currentColClassName: 'currentCol',
+    colHeaders: ['id','IS対応者','会社名','名前','イベント参加状況','フォロー状況','電話','部署','役職','業種','従業員数','採用支援サービス','サービスを知ったきっかけ','問い合わせ内容（フリーコメント）'],
+    columnSorting: true,
+    columns: [
+     {data: 'id', readOnly:true},
+     {data: 'leadOwnerOrQueue__c', readOnly:true},
+     {data: 'CompanyName__c', readOnly:true},
+     {data: 'name', readOnly:true, renderer: 'html'},
+     {data: 'academy_status__c', readOnly:false, type: 'dropdown', source: ['--なし--', '応募のみ', '参加', '不参加', 'プラスカ付与済'],
+            validator: academy_status__cRegexp, allowInvalid: false},
+     {data: 'IS__c', readOnly:false, type: 'dropdown', source: ['未判定', 'アプローチ中', 'アポ獲得', 'セミナー送客', 'コンタクト不可（フォロー終了）'],
+            validator: IS__cRegexp, allowInvalid: false},
+     {data: 'LeadOrContactPhone__c', readOnly:true},
+     {data: 'LeadOrContactDepartment__c', readOnly:true},
+     {data: 'LeadOrContactTitle__c', readOnly:true},
+     {data: 'LeadOrContactIndustry__c', readOnly:true},
+     {data: 'LeadOrContactEmployees__c', readOnly:true},
+     {data: 'AdoptionSupportService__c', readOnly:true},
+     {data: 'Path__c', readOnly:true},
+     {data: 'Inquiry__c', readOnly:true}
+    ],
+    colWidths: ['1','200','200','200','120','130','120','150','110','150','130','300','200','300'],
+    manualColumnFreeze: true,
+    fixedColumnsLeft: 4,
+    cells: function (row, col, prop) {
+      var cellProperties = {};
+      if (col === 0) {
+        cellProperties.renderer = columnGrayColorRenderer;
+      }
+      /*if (col === 4 || col === 5){
+        cellProperties.renderer = columnYellowColorRenderer;
+    }*/
+      return cellProperties;
+    }
+};
+
+cpmAcademySettings = {
+    rowHeaders: true,
+    colHeaders: true,
+    currentRowClassName: 'currentRow',
+    currentColClassName: 'currentCol',
+    colHeaders: ['id','会社名','名前','イベント参加状況','お礼メール種別','プラスカ要否','メール','フォロー状況','電話','部署','役職','業種','従業員数','採用支援サービス','サービスを知ったきっかけ','問い合わせ内容（フリーコメント）'],
+    columnSorting: true,
+    columns: [
+     {data: 'id', readOnly:true},
+     {data: 'CompanyName__c', readOnly:true},
+     {data: 'name', readOnly:true, renderer: 'html'},
+     {data: 'academy_status__c', readOnly:false, type: 'dropdown', source: ['--なし--', '応募のみ', '参加', '不参加', 'プラスカ付与済'],
+            validator: academy_status__cRegexp, allowInvalid: false},
+     {data: 'CategoryOfEmail__c', readOnly:false, type: 'dropdown', source: ['--なし--', '送信', '採用+母集団'],
+            validator: CategoryOfEmail__cRegexp, allowInvalid: false},
+     {data: 'PluscouNecessity__c', readOnly:false, type: 'dropdown', source: ['--なし--', 'プラスカ付与あり', 'プラスカ付与なし'],
+            validator: PluscouNecessity__cRegexp, allowInvalid: false},
+     {data: 'LeadOrContactEmail__c', readOnly:true},
+     {data: 'IS__c', readOnly:false, type: 'dropdown', source: ['未判定', 'アプローチ中', 'アポ獲得', 'セミナー送客', 'コンタクト不可（フォロー終了）'],
+            validator: IS__cRegexp, allowInvalid: false},
+     {data: 'LeadOrContactPhone__c', readOnly:true},
+     {data: 'LeadOrContactDepartment__c', readOnly:true},
+     {data: 'LeadOrContactTitle__c', readOnly:true},
+     {data: 'LeadOrContactIndustry__c', readOnly:true},
+     {data: 'LeadOrContactEmployees__c', readOnly:true},
+     {data: 'AdoptionSupportService__c', readOnly:true},
+     {data: 'Path__c', readOnly:true},
+     {data: 'Inquiry__c', readOnly:true}
+    ],
+    colWidths: ['1','200','200','120','110','130','170','130','120','150','110','150','130','300','200','300'],
+    manualColumnFreeze: true,
+    fixedColumnsLeft: 3,
+    cells: function (row, col, prop) {
+      var cellProperties = {};
+      if (col === 0) {
+        cellProperties.renderer = columnGrayColorRenderer;
+      }
+      /*if (col === 3 || col === 7){
+        cellProperties.renderer = columnYellowColorRenderer;
+    }*/
+      return cellProperties;
+    }
+}
+
+ssrSeminarSettings = {
+    rowHeaders: true,
+    colHeaders: true,
+    currentRowClassName: 'currentRow',
+    currentColClassName: 'currentCol',
+    //colHeaders: ['id','CampaignMemberId__c','CampaignId__c','LeadId__c','ContactId__c','会社名','名前','メールアドレス','部署名','電話番号','役職クラス','業界','従業員数','採用支援サービス','サービスを知ったきっかけ','問い合わせ内容（フリーコメント）'],
+    colHeaders: ['id','CampaignMemberId__c','CampaignId__c','LeadId__c','ContactId__c','会社名','名前','メールアドレス','採用支援サービス','問い合わせ内容（フリーコメント）','Q1','A1','Q2','A2','Q3','A3'],
+    columnSorting: true,
+    columns: [
+     {data: 'id', readOnly:true},
+     {data: 'CampaignMemberId__c', readOnly:true},
+     {data: 'CampaignId__c', readOnly:true},
+     {data: 'LeadId__c', readOnly:true},
+     {data: 'ContactId__c', readOnly:true},
+     {data: 'Company__c', readOnly:true},
+     {data: 'Name__c', readOnly:true},
+     {data: 'Email__c', readOnly:true},
+	 /*{data: 'Department__c', readOnly:false},
+     {data: 'Phone__c', readOnly:false,
+            validator: phoneRegexp, allowInvalid: false},
+     {data: 'Position__c', readOnly:false, type: 'dropdown', source: ['--なし--', '経営者', '役員', '部長', '課長','主任/係長','一般社員'],
+            validator: Position__cRegexp, allowInvalid: false},
+     {data: 'Industry__c', readOnly:false, type: 'dropdown', source: ['--なし--', 'IT・インターネット', 'メーカー', '商社', '流通・小売・サービス', 'コンサルティング', 'マスコミ・メディア', 'エンターテイメント', '金融', '建築・不動産', 'メディカル', 'インフラ', 'その他'],
+            validator: Industry__cRegexp, allowInvalid: false},
+     {data: 'EmployeeNumber__c', readOnly:false, type: 'dropdown', source: ['--なし--', '1～30人', '31～100人', '101～500人', '501～5,000人', '5,001人以上', '非公開'],
+            validator: EmployeeNumber__cRegexp, allowInvalid: false},*/
+     {data: 'AdoptionSupportService__c', readOnly:false, type: 'dropdown', source: ['--なし--', '新たに採用支援サービスの選定を行っている', '新たに採用支援サービスの利用を検討しており、情報収集をしている', '新たに採用支援サービスを利用する予定はない'],
+            validator: AdoptionSupportService__cRegexp, allowInvalid: false},
+     /*{data: 'know_was_triggered__c', readOnly:false, type: 'dropdown', source: ['--なし--', 'CMを見て', 'Web広告を見て', 'Web上の記事を読んで', '雑誌・新聞を見て', 'DM・チラシを見て', 'インターネットで検索して', '周囲からの口コミ', 'その他'],
+            validator: know_was_triggered__cRegexp, allowInvalid: false},*/
+     {data: 'Inquiry__c', readOnly:false},
+     {data: 'Q1__c', readOnly:false},
+     {data: 'A1__c', readOnly:false},
+     {data: 'Q2__c', readOnly:false},
+     {data: 'A2__c', readOnly:false},
+     {data: 'Q3__c', readOnly:false},
+     {data: 'A3__c', readOnly:false}
+    ],
+    //colWidths: ['1','1','1','1','1','200','150','170','150','100','90','150','110','300','170','300'],
+    colWidths: ['1','1','1','1','1','200','150','170','300','300','200','200','200','200','200','200'],
+    manualColumnFreeze: true,
+    fixedColumnsLeft: 8,
+    cells: function (row, col, prop) {
+      var cellProperties = {};
+      if (col === 0 || col === 1 ) {
+        cellProperties.renderer = columnGrayColorRenderer;
+      }
+      return cellProperties;
+    }
+}
+
+//---------- Id列のグレー色専用のCSS定義 ----------
+function columnGrayColorRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.style.background = '#CCCCCC';
+}
+
+//---------- 重要列の黄色専用のCSS定義 ----------
+function columnYellowColorRenderer(instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    td.style.background = '#FFFFEE';
+}
+
+//-------選択リストの値を取得するHelperメソッド--------
+function getSelectedMenu(Id) {
+  var element = document.getElementById(Id);
+  var opValue = '';
+  for (var i=0;i<element.options.length;i++) {
+    var option = element.options[i];
+    if (option.selected){
+      opValue = option.value;
+    }
+  }
+  return opValue;
+}
+
+function setInitView(){
+    $('#loading').css('display', 'none');
+    if({!semiMgAllowedFlag} == false){
+        $('#saveActive').css('display', 'none');
+    }else if({!semiMgAllowedFlag} == true){
+        $('#saveNonActive').css('display', 'none');
+    }
+}
+
+
+
+</script>
+
+</body>
+</apex:page>
